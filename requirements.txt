@@ -1,0 +1,25 @@
+# Web Framework
+Flask
+Flask-Cors
+
+# Deep Learning
+torch
+torchvision
+timm
+
+# Image & PDF Processing
+Pillow
+opencv-python
+PyMuPDF
+
+# Data Science & Math
+numpy
+pandas
+scikit-learn
+
+# Visualization
+matplotlib
+seaborn
+
+# HTTP Requests
+requests
