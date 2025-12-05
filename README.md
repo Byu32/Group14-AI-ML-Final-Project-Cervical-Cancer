@@ -45,5 +45,5 @@ drive.mount('/content/drive')
 ### 4. Model Demonstration
 *   **Activate Backend**: Navigate to the **`_demo/`** folder in your terminal and run `python app.py`.
 *   **Launch Interface**: Open **`GUI.html`** in a web browser.
-*   **Load Model**: Click "Admin Model Upload", enter the security code **"cerviGOAT"**, and upload the **`trained_cervical_classifier.pkl`** file.
+*   **Load Model**: Click "Admin Model Upload", enter the security code **"cerviGOAT"**, and upload the **`final_model_full.pkl`** file.
 *   **Inference**: Upload sample images from the **`via_dataset`** folder to receive real-time diagnoses (Normal/Precancerous/Cancerous) with confidence levels.
