@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cervical Cancer Diagnosis</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-green: #2ecc71;
+            --success-green-hover: #27ae60;
+            --bg-color: #f4f7f6;
+            --box-border: #bdc3c7;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        /* Header Layout */
+        header {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 0 20px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 3rem; 
+            margin: 0;
+        }
+
+        .admin-btn {
+            background-color: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .admin-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Layout Container */
+        .main-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 60px; 
+            background: white;
+            padding: 60px;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            max-width: 1400px; 
+            width: 90%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Image Box Sections */
+        .image-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 350px; 
+        }
+
+        .image-box {
+            width: 350px; 
+            height: 300px; 
+            border: 3px dashed var(--box-border);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            background-color: #fafafa;
+            background-size: cover;
+            background-position: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-box:hover {
+            border-color: var(--accent-color);
+            background-color: #ecf0f1;
+        }
+
+        .image-box p {
+            color: #7f8c8d;
+            font-weight: 600;
+            font-size: 1.5rem; 
+            pointer-events: none;
+            text-align: center;
+        }
+
+        .section-label {
+            margin-top: 20px;
+            font-size: 1.8rem; 
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        /* Input specific styles */
+        #upload-input, #model-input {
+            display: none;
+        }
+
+        /* GradCam specific styles */
+        #gradcam-box {
+            border-style: solid;
+            cursor: default;
+        }
+
+        /* Results & Controls Section */
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 300px;
+            padding-left: 30px;
+        }
+
+        .result-text {
+            font-size: 1.8rem; 
+            margin: 15px 0;
+            color: var(--primary-color);
+        }
+
+        .result-value {
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-left: 10px;
+        }
+
+        /* Diagnose Button Standard State */
+        .diagnose-btn {
+            margin-top: 30px;
+            padding: 20px 40px; 
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.6rem; 
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Disabled State (Initial) */
+        .diagnose-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .diagnose-btn:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        /* The "Pretty" Green State */
+        .diagnose-btn.model-ready {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            box-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
+            border: 2px solid #2ecc71;
+            animation: pulse-green 2s infinite;
+        }
+
+        .diagnose-btn.model-ready:hover {
+            background: linear-gradient(135deg, #27ae60 0%, #219150 100%);
+            transform: scale(1.05);
+        }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+
+        /* Spinner */
+        .spinner {
+            display: none;
+            width: 50px;
+            height: 50px;
+            border: 6px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- MODAL STYLES --- */
+        .modal-overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            width: 500px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+        .modal-input {
+            width: 80%;
+            padding: 15px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .modal-btn {
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: white;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 10px;
+            display: none;
+            font-size: 1.1rem;
+        }
+
+        .upload-area-hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Cervical Cancer Diagnosis</h1>
+        <button class="admin-btn" onclick="openAdminModal()">Admin Model Upload</button>
+    </header>
+
+    <div class="main-container">
+        
+        <!-- Left: Upload Section -->
+        <div class="image-section">
+            <input type="file" id="upload-input" accept="image/*">
+            <div class="image-box" id="upload-box" onclick="triggerUpload()">
+                <p id="upload-text">Click to Upload Image</p>
+            </div>
+            <div class="section-label">Your Image</div>
+        </div>
+
+        <!-- Middle: GradCam Section -->
+        <div class="image-section">
+            <div class="image-box" id="gradcam-box">
+                <p id="gradcam-text">Waiting for model...</p>
+                <div class="spinner" id="loading-spinner"></div>
+            </div>
+            <div class="section-label">Grad Cam</div>
+        </div>
+
+        <!-- Right: Results & Controls -->
+        <div class="controls-section">
+            <div class="result-text">
+                Result: <span id="result-output" class="result-value">-</span>
+            </div>
+            <div class="result-text">
+                Confidence: <span id="confidence-output" class="result-value">-</span>
+            </div>
+            
+            <button class="diagnose-btn" id="diagnose-btn" onclick="runDiagnosis()" disabled>Diagnose (Load Model First)</button>
+        </div>
+
+    </div>
+
+    <!-- ADMIN MODAL -->
+    <div class="modal-overlay" id="admin-modal">
+        <div class="modal-close" onclick="closeAdminModal()">&times;</div>
+        
+        <div class="modal-box">
+            <!-- Password Step -->
+            <div id="password-step">
+                <div class="modal-title">Admin Access</div>
+                <p>Please enter the password to upload a new model.</p>
+                <input type="password" id="admin-password" class="modal-input" placeholder="Enter Password">
+                <br>
+                <button class="modal-btn" onclick="checkPassword()">Unlock</button>
+                <p class="error-msg" id="password-error">Incorrect Password!</p>
+            </div>
+
+            <!-- Upload Step (Hidden initially) -->
+            <div id="upload-step" class="upload-area-hidden">
+                <div class="modal-title">Upload New Model</div>
+                <p>Select your .h5, .pkl, or .model file</p>
+                
+                <input type="file" id="model-input" accept=".h5,.pkl,.model,.pb">
+                <button class="modal-btn" onclick="document.getElementById('model-input').click()">Select Model File</button>
+                
+                <p id="model-file-name" style="margin-top: 15px; font-weight: bold; color: #555;"></p>
+                <div id="model-loading" style="display:none; margin-top:10px; color: var(--accent-color);">Reading Model...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- VARIABLES ---
+        const uploadInput = document.getElementById('upload-input');
+        const uploadBox = document.getElementById('upload-box');
+        const uploadText = document.getElementById('upload-text');
+        
+        const gradCamBox = document.getElementById('gradcam-box');
+        const gradCamText = document.getElementById('gradcam-text');
+        const spinner = document.getElementById('loading-spinner');
+        
+        const resultOutput = document.getElementById('result-output');
+        const confidenceOutput = document.getElementById('confidence-output');
+        const diagnoseBtn = document.getElementById('diagnose-btn');
+
+        // Modal Elements
+        const adminModal = document.getElementById('admin-modal');
+        const passwordStep = document.getElementById('password-step');
+        const uploadStep = document.getElementById('upload-step');
+        const passwordInput = document.getElementById('admin-password');
+        const passwordError = document.getElementById('password-error');
+        const modelInput = document.getElementById('model-input');
+        const modelFileName = document.getElementById('model-file-name');
+        const modelLoading = document.getElementById('model-loading');
+
+        let uploadedImage = null;
+        let isCustomModelLoaded = false;
+
+        // --- MAIN IMAGE UPLOAD LOGIC ---
+        function triggerUpload() {
+            uploadInput.click();
+        }
+
+        uploadInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImage = e.target.result;
+                    uploadBox.style.backgroundImage = `url(${uploadedImage})`;
+                    uploadBox.style.borderStyle = 'solid';
+                    uploadText.style.display = 'none';
+                    resetResults();
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function resetResults() {
+            resultOutput.innerText = "-";
+            resultOutput.style.color = "var(--accent-color)"; // Reset color
+            confidenceOutput.innerText = "-";
+            gradCamBox.style.backgroundImage = 'none';
+            gradCamBox.style.filter = "none";
+            gradCamText.style.display = 'block';
+            gradCamText.innerText = "Waiting for model...";
+        }
+
+        // --- REAL DIAGNOSIS LOGIC ---
+        async function runDiagnosis() {
+            if (!uploadedImage) {
+                alert("Please upload an image first.");
+                return;
+            }
+
+            // UI Updates
+            gradCamText.style.display = 'none';
+            spinner.style.display = 'block';
+            resultOutput.innerText = "...";
+            confidenceOutput.innerText = "...";
+
+            // Prepare the file for sending
+            const formData = new FormData();
+            formData.append('file', uploadInput.files[0]);
+
+            try {
+                // 1. Send Request to Python Backend (Port 5001)
+                const response = await fetch('http://localhost:5001/predict', {                    
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.error || "Server Error");
+                }
+
+                // 2. Receive Real Data
+                const data = await response.json();
+
+                // 3. Update UI
+                spinner.style.display = 'none';
+                
+                resultOutput.innerText = data.prediction;
+                confidenceOutput.innerText = data.confidence;
+
+                // Color Logic
+                if (data.prediction === "Normal") {
+                    resultOutput.style.color = "#2ecc71"; // Green
+                } else if (data.prediction === "Precancer") {
+                    resultOutput.style.color = "#f1c40f"; // Orange
+                } else {
+                    resultOutput.style.color = "#e74c3c"; // Red
+                }
+
+                // 4. Display Grad-CAM Heatmap
+                if (data.gradcam_image) {
+                    // Backend sent a heatmap! Display it.
+                    gradCamBox.style.backgroundImage = `url(${data.gradcam_image})`;
+                    gradCamBox.style.filter = "none"; 
+                } else {
+                    // Fallback
+                    gradCamBox.style.backgroundImage = `url(${uploadedImage})`;
+                    gradCamBox.style.filter = "none"; 
+                }
+
+            } catch (error) {
+                console.error(error);
+                spinner.style.display = 'none';
+                // Only show alert if it's a connection error or explicit server error
+                if(error.message.includes("No model")) {
+                     alert(error.message);
+                } else {
+                     alert("Could not connect to the model. Is app.py running?");
+                }
+                
+                gradCamText.style.display = 'block';
+                gradCamText.innerText = "Connection Failed";
+            }
+        }
+
+        // --- ADMIN MODAL LOGIC ---
+        function openAdminModal() {
+            adminModal.style.display = "flex";
+            // Reset modal state
+            passwordStep.style.display = "block";
+            uploadStep.style.display = "none";
+            passwordInput.value = "";
+            passwordError.style.display = "none";
+        }
+
+        function closeAdminModal() {
+            adminModal.style.display = "none";
+        }
+
+        // Close modal if clicking outside box
+        window.onclick = function(event) {
+            if (event.target == adminModal) {
+                closeAdminModal();
+            }
+        }
+
+        function checkPassword() {
+            const input = passwordInput.value;
+            // Case Sensitive Check
+            if (input === "cerviGOAT") {
+                passwordStep.style.display = "none";
+                uploadStep.style.display = "block"; // Show upload interface
+            } else {
+                passwordError.style.display = "block";
+                passwordInput.classList.add('shake');
+                setTimeout(() => passwordInput.classList.remove('shake'), 500);
+            }
+        }
+
+        // --- MODEL UPLOAD LOGIC ---
+        modelInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                modelFileName.innerText = "Selected: " + file.name;
+                modelLoading.style.display = "block";
+                modelLoading.innerText = "Uploading to server...";
+                modelLoading.style.color = "var(--accent-color)";
+
+                // Create Form Data to send to Backend
+                const formData = new FormData();
+                formData.append('file', file);
+
+                try {
+                    // Send file to Python Backend
+                    const response = await fetch('http://localhost:5001/upload_model', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.error || "Upload failed");
+                    }
+
+                    const data = await response.json();
+                    
+                    // Success UI
+                    modelLoading.style.display = "none";
+                    isCustomModelLoaded = true;
+                    closeAdminModal();
+                    
+                    // ENABLE BUTTON AND CHANGE VISUALS
+                    diagnoseBtn.disabled = false;
+                    diagnoseBtn.classList.add('model-ready');
+                    diagnoseBtn.innerText = "Diagnose";
+                    alert("Success! " + data.message);
+
+                } catch (error) {
+                    console.error(error);
+                    modelLoading.innerText = "Error: " + error.message;
+                    modelLoading.style.color = "#e74c3c"; // Red for error
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
